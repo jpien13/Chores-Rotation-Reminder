@@ -5,18 +5,6 @@ from email.mime.text import MIMEText
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-email_address = os.getenv('EMAIL_ADDRESS')
-email_password = os.getenv('EMAIL_PASSWORD')
-smtp_server = 'smtp.gmail.com'  
-smtp_port = 587  
-
-
-recipient_phone_number = input('Enter the recipient\'s phone number: ')
-carrier_gateway = 'vtext.com'  
-
-
-message_body = input('Enter the message you want to send: ')
-
 CARRIER_GATEWAYS = {
     'AT&T': 'txt.att.net',
     'Verizon': 'vtext.com',
@@ -53,8 +41,3 @@ def send_sms_via_email(email, password, smtp_server, smtp_port, phone_number, ca
     except Exception as e:
         logging.error(f"An unexpected error occurred: {e}")
         return False
-
-if send_sms_via_email(email_address, email_password, smtp_server, smtp_port, recipient_phone_number, carrier_gateway, message_body):
-    logging.info("SMS sent successfully!")
-else:
-    logging.error("Failed to send SMS.")

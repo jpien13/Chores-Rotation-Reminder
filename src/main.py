@@ -1,13 +1,19 @@
-#from send import send_sms_via_email
+from send import send_sms_via_email
 import argparse
 import json
 from datetime import datetime, time
 import pytz
+import os
+import logging
 
 chore_list = [
-    "Chore 0", # 0
-    "Chore 1", # 1
-    "Chore 2"  # 2
+    "Floor Duty. (Kitchen, Livingroom & Stairs going upstairs)",    # 0
+    "Kitchen Duty. (Island, Stove & Sink Dishes if any)",           # 1
+    "Trash Duty. (Kitchen & Bathrooms)",                            # 2
+    "Upstairs Bathroom Duty. (Sink & Shower Floors)",               # 3
+    "Fridge Purge. (Remove old food, ask ppl if you are unsure)",   # 4
+    "Living Room Duty. (Couch & Table)",                            # 5
+    "Downstairs Bathroom Duty. (Sink & Shower Floors)"              # 6
 ]
 
 def read_json(file_path):
@@ -25,21 +31,21 @@ def write_json(file_path, data):
         json.dump(data, file, indent=4)
 
 def rotate_chores():
-    roommates = read_json('roomate_to_chore.json')
-    num_chores = len(chore_list)
+    print("Rotating Chores...")
+    data = read_json('roomate_to_chore.json')
+    num_chores = len(data)
     
     current_chores = []
-    for i in range(num_chores):
-        roommate = f"Roommate {i}"
-        current_chores.append(roommates[roommate])
+    for roommate in data:
+        current_chores.append(data[roommate]['chore_id'])
     
-    for i in range(num_chores):
-        roommate = f"Roommate {i}"
-        prev_chore_index = (i - 1) % num_chores
-        roommates[roommate] = current_chores[prev_chore_index]
-        print(f"{roommate} is now assigned to {chore_list[roommates[roommate]]}")
+    for i, roommate in enumerate(data):
+        prev_chore_index = (i + 1) % num_chores
+        data[roommate]['chore_id'] = current_chores[prev_chore_index]
+        print(f"{roommate} is now assigned to {chore_list[data[roommate]['chore_id']]}")
 
-    write_json('roomate_to_chore.json', roommates)
+    write_json('roomate_to_chore.json', data)
+    print("updated json...")
 
 def check_days():
     est = pytz.timezone('US/Eastern')
@@ -64,6 +70,11 @@ def main():
     args = parser.parse_args()
     if not (args.testmode or args.prod):
         print("No functions specified. Use --print or --rotate to run functions.")
+
+    email_address = os.getenv('EMAIL_ADDRESS')
+    email_password = os.getenv('EMAIL_PASSWORD')
+    smtp_server = 'smtp.gmail.com'  
+    smtp_port = 587  
     
     if args.testmode:
 
@@ -82,20 +93,54 @@ def main():
         if is_sunday:
             data = read_json('roomate_to_chore.json')
             print(data)
+            for person in data:
+                message_body = f"Hello {person}, you have {chore_list[data[person]['chore_id']]} today."
+                recipient_phone_number = data[person]['phone_num']
+                carrier_gateway = data[person]['carrier']
+                print(f"{person} would have received a text saying: Hello {person}, {message_body}")
+                print(f"Phone number: {recipient_phone_number}")
+                print(f"Carrier: {carrier_gateway}")
         
         if is_monday:
             rotate_chores()
+            data = read_json('roomate_to_chore.json')
+            for person in data:
+                message_body = f"Hello {person}, you have {chore_list[data[person]['chore_id']]} today."
+                recipient_phone_number = data[person]['phone_num']
+                carrier_gateway = data[person]['carrier']
+                print(f"{person} would have received a text saying: {message_body}")
+                print(f"Phone number: {recipient_phone_number}")
+                print(f"Carrier: {carrier_gateway}")
+        
 
     if args.prod:
         is_sunday, is_monday = check_days()
+        print("prod run")
+        is_monday = True
 
         if is_sunday:
+            print("is sunday")
             data = read_json('roomate_to_chore.json')
             print(data)
+            for person in data:
+                message_body = f"Hello {person}, you have {chore_list[data[person]['chore_id']]} today."
+                if send_sms_via_email(email_address, email_password, smtp_server, smtp_port, data[person]['phone_num'], data[person]['carrier'], message_body):
+                    logging.info("SMS sent successfully!")
+                else:
+                    logging.error("Failed to send SMS.")
         
         if is_monday:
+            print("is Monday")
             rotate_chores()
-
+            print("Reading Json")
+            data = read_json('roomate_to_chore.json')
+            print("attempting to send...")
+            for person in data:
+                message_body = f"Hello {person}, your new chore this week is: {chore_list[data[person]['chore_id']]}."
+                if send_sms_via_email(email_address, email_password, smtp_server, smtp_port, data[person]['phone_num'], data[person]['carrier'], message_body):
+                    logging.info("SMS sent successfully!")
+                else:
+                    logging.error("Failed to send SMS.")
     
 
 if __name__ == "__main__":
