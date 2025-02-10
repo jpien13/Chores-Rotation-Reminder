@@ -1,0 +1,4 @@
+venv/
+.DS_Store
+secrets.txt
+DO_NOT_PUSH.py
