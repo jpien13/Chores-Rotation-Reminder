@@ -32,7 +32,7 @@ def write_json(file_path, data):
 
 def rotate_chores():
     print("Rotating Chores...")
-    data = read_json('roomate_to_chore.json')
+    data = read_json('roommate_to_chore.json')
     num_chores = len(data)
     
     current_chores = []
@@ -44,21 +44,35 @@ def rotate_chores():
         data[roommate]['chore_id'] = current_chores[prev_chore_index]
         print(f"{roommate} is now assigned to {chore_list[data[roommate]['chore_id']]}")
 
-    write_json('roomate_to_chore.json', data)
+    write_json('roommate_to_chore.json', data)
+    print("updated json...")
+
+def test_rotate_chores():
+    print("Rotating Chores...")
+    data = read_json('test_roommate_to_chore.json')
+    num_chores = len(data)
+    
+    current_chores = []
+    for roommate in data:
+        current_chores.append(data[roommate]['chore_id'])
+    
+    for i, roommate in enumerate(data):
+        prev_chore_index = (i + 1) % num_chores
+        data[roommate]['chore_id'] = current_chores[prev_chore_index]
+        print(f"{roommate} is now assigned to {chore_list[data[roommate]['chore_id']]}")
+
+    write_json('test_roommate_to_chore.json', data)
     print("updated json...")
 
 def check_days():
     est = pytz.timezone('US/Eastern')
     now = datetime.now(est)
     
-    target_time = time(hour=15, minute=0)  # 15:00 = 3 PM
-    
     # Get current weekday (0 = Monday, 6 = Sunday)
     weekday = now.weekday()
-    current_time = now.time()
     
-    is_sunday = weekday == 6 and current_time.hour == target_time.hour
-    is_monday = weekday == 0 and current_time.hour == target_time.hour
+    is_sunday = weekday == 6
+    is_monday = weekday == 0
     
     return is_sunday, is_monday
 
@@ -86,12 +100,12 @@ def main():
             is_sunday = False
             is_monday = True
         else:
-            data = read_json('roomate_to_chore.json')
+            data = read_json('test_roommate_to_chore.json')
             print(data)
             return
         
         if is_sunday:
-            data = read_json('roomate_to_chore.json')
+            data = read_json('test_roommate_to_chore.json')
             print(data)
             for person in data:
                 message_body = f"Hello {person}, you have {chore_list[data[person]['chore_id']]} today."
@@ -102,8 +116,8 @@ def main():
                 print(f"Carrier: {carrier_gateway}")
         
         if is_monday:
-            rotate_chores()
-            data = read_json('roomate_to_chore.json')
+            test_rotate_chores()
+            data = read_json('test_roommate_to_chore.json')
             for person in data:
                 message_body = f"Hello {person}, you have {chore_list[data[person]['chore_id']]} today."
                 recipient_phone_number = data[person]['phone_num']
@@ -116,11 +130,10 @@ def main():
     if args.prod:
         is_sunday, is_monday = check_days()
         print("prod run")
-        is_monday = True
 
         if is_sunday:
             print("is sunday")
-            data = read_json('roomate_to_chore.json')
+            data = read_json('roommate_to_chore.json')
             print(data)
             for person in data:
                 message_body = f"Hello {person}, you have {chore_list[data[person]['chore_id']]} today."
@@ -133,7 +146,7 @@ def main():
             print("is Monday")
             rotate_chores()
             print("Reading Json")
-            data = read_json('roomate_to_chore.json')
+            data = read_json('roommate_to_chore.json')
             print("attempting to send...")
             for person in data:
                 message_body = f"Hello {person}, your new chore this week is: {chore_list[data[person]['chore_id']]}."

@@ -1,0 +1,32 @@
+ename: Run Chore Management Script
+
+on:
+  schedule:
+    # Run at 3 PM EST (19:00 UTC) on Sundays
+    - cron: '0 19 * * 0'
+    # Run at 3 PM EST (19:00 UTC) on Mondays
+    - cron: '0 19 * * 1'
+
+jobs:
+  run-chore-script:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.12.4'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: Run script
+      env:
+        EMAIL_ADDRESS: ${{ secrets.EMAIL_ADDRESS }}
+        EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+      run: python main.py --prod
