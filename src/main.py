@@ -144,7 +144,7 @@ def main():
         
         if is_monday:
             print("is Monday")
-            rotate_chores()
+            rotate_chores() 
             print("Reading Json")
             data = read_json('roommate_to_chore.json')
             print("attempting to send...")

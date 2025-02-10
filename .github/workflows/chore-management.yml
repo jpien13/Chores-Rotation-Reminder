@@ -27,7 +27,8 @@ jobs:
         pip install -r requirements.txt
         
     - name: Run script
+      working-directory: ./src
       env:
         EMAIL_ADDRESS: ${{ secrets.EMAIL_ADDRESS }}
         EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
-      run: python src/main.py --prod
+      run: python main.py --prod
