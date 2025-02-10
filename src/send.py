@@ -15,7 +15,7 @@ recipient_phone_number = input('Enter the recipient\'s phone number: ')
 carrier_gateway = 'vtext.com'  
 
 
-message_body = 'This was sent at 2:13 On monday'
+message_body = input('Enter the message you want to send: ')
 
 CARRIER_GATEWAYS = {
     'AT&T': 'txt.att.net',
