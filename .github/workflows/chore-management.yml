@@ -1,4 +1,4 @@
-ename: Run Chore Management Script
+name: Run Chore Management Script
 
 on:
   schedule:
