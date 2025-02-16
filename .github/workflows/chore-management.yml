@@ -2,9 +2,7 @@ name: Run Chore Management Script
 
 on:
   schedule:
-    # Run at 3 PM EST (19:00 UTC) on Sundays
     - cron: '0 19 * * 0'
-    # Run at 3 PM EST (19:00 UTC) on Mondays
     - cron: '0 19 * * 1'
   workflow_dispatch:
 
@@ -15,6 +13,8 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}  # Needed for push access
 
     - name: Set up Python
       uses: actions/setup-python@v2
@@ -32,3 +32,10 @@ jobs:
         EMAIL_ADDRESS: ${{ secrets.EMAIL_ADDRESS }}
         EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
       run: python main.py --prod
+
+    - name: Commit and push if changed
+      run: |
+        git config --global user.name 'GitHub Actions Bot'
+        git config --global user.email 'actions@github.com'
+        git add ./src/roommate_to_chore.json
+        git diff --quiet && git diff --staged --quiet || (git commit -m "Update chore assignments [skip ci]" && git push)
