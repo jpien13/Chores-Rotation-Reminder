@@ -14,7 +14,7 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
       with:
-        token: ${{ secrets.GITHUB_TOKEN }}  # Needed for push access
+        token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Set up Python
       uses: actions/setup-python@v2
@@ -33,9 +33,12 @@ jobs:
         EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
       run: python main.py --prod
 
-    - name: Commit and push if changed
+    - name: Commit and push if JSON changed
       run: |
         git config --global user.name 'GitHub Actions Bot'
         git config --global user.email 'actions@github.com'
-        git add ./src/roommate_to_chore.json
-        git diff --quiet && git diff --staged --quiet || (git commit -m "Update chore assignments [skip ci]" && git push)
+        if [[ -n $(git status --porcelain src/roommate_to_chore.json) ]]; then
+          git add src/roommate_to_chore.json
+          git commit -m "Update chore assignments [skip ci]"
+          git push
+        fi
