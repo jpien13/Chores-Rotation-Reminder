@@ -73,8 +73,19 @@ def check_days():
     
     is_sunday = weekday == 6
     is_monday = weekday == 0
+    is_monday = weekday == 1
     
-    return is_sunday, is_monday
+    return is_sunday, is_monday, is_tuesday
+
+def find_previous_trash_duty_person(data):
+
+    for roommate in data:
+        current_chore_id = data[roommate]['chore_id']
+        num_chores = len(data)
+        prev_chore_id = (current_chore_id - 1) % num_chores
+        if prev_chore_id == 2:  # If they had Trash Duty last week
+            return roommate
+    return None
 
 def main():
     parser = argparse.ArgumentParser(description='Script with two optional flags')
@@ -96,9 +107,15 @@ def main():
         if sim_day == 'sunday':
             is_sunday = True
             is_monday = False
+            is_tuesday = False
         elif sim_day == 'monday':
             is_sunday = False
             is_monday = True
+            is_tuesday = False
+        elif sim_day == 'tuesday':
+            is_sunday = False
+            is_monday = False
+            is_tuesday = True
         else:
             data = read_json('test_roommate_to_chore.json')
             print(data)
@@ -125,10 +142,25 @@ def main():
                 print(f"{person} would have received a text saying: {message_body}")
                 print(f"Phone number: {recipient_phone_number}")
                 print(f"Carrier: {carrier_gateway}")
+    
+        if is_tuesday:
+            data = read_json('test_roommate_to_chore.json')
+            trash_duty_person = find_previous_trash_duty_person(data)
+            if trash_duty_person:
+                message_body = f"Don't forget to take the trash back in!"
+                recipient_phone_number = data[trash_duty_person]['phone_num']
+                carrier_gateway = data[trash_duty_person]['carrier']
+                print(f"{trash_duty_person} would have received a text saying: {message_body}")
+                print(f"Phone number: {recipient_phone_number}")
+                print(f"Carrier: {carrier_gateway}")
+
+            else:
+
+                print("Could not identify who had Trash Duty last week")
         
 
     if args.prod:
-        is_sunday, is_monday = check_days()
+        is_sunday, is_monday, is_tuesday = check_days()
         print("prod run")
 
         if is_sunday:
@@ -155,6 +187,19 @@ def main():
                 else:
                     logging.error("Failed to send SMS.")
     
+        if is_tuesday:
+            print("is Tuesday")
+            data = read_json('roommate_to_chore.json')
+            trash_duty_person = find_previous_trash_duty_person(data)
+            if trash_duty_person:
+                print(f"Sending reminder to {trash_duty_person} about taking in the trash")
+                message_body = f"Don't forget to take the trash back in!"
+                if send_sms_via_email(email_address, email_password, smtp_server, smtp_port, data[trash_duty_person]['phone_num'], data[trash_duty_person]['carrier'], message_body):
+                    logging.info("Trash reminder SMS sent successfully!")
+                else:
+                    logging.error("Failed to send trash reminder SMS.")
+            else:
+                logging.error("Could not identify who had Trash Duty last week")
 
 if __name__ == "__main__":
     
