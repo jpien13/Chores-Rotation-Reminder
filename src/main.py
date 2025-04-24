@@ -73,7 +73,7 @@ def check_days():
     
     is_sunday = weekday == 6
     is_monday = weekday == 0
-    is_monday = weekday == 1
+    is_tuesday = weekday == 1
     
     return is_sunday, is_monday, is_tuesday
 
