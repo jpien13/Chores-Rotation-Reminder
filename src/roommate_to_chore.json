@@ -1,36 +1,36 @@
 {
     "Oscar": {
-        "chore_id": 0,
+        "chore_id": 1,
         "phone_num": "4138843213",
         "carrier": "vtext.com"
     },
     "Aidan": {
-        "chore_id": 1,
+        "chore_id": 2,
         "phone_num": "4154468489",
         "carrier": "txt.att.net"
     },
     "Alex": {
-        "chore_id": 2,
+        "chore_id": 3,
         "phone_num": "8023634558",
         "carrier": "txt.att.net"
     },
     "Brendan": {
-        "chore_id": 3,
+        "chore_id": 4,
         "phone_num": "9258179507",
         "carrier": "vtext.com"
     },
     "Jason": {
-        "chore_id": 4,
+        "chore_id": 5,
         "phone_num": "9083777981",
         "carrier": "vtext.com"
     },
     "Ryan": {
-        "chore_id": 5,
+        "chore_id": 6,
         "phone_num": "6268237358",
         "carrier": "tmomail.net"
     },
     "Noah": {
-        "chore_id": 6,
+        "chore_id": 0,
         "phone_num": "9176485328",
         "carrier": "vtext.com"
     }
